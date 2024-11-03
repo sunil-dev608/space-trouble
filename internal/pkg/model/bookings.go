@@ -2,8 +2,11 @@ package model
 
 import (
 	"time"
+)
 
-	"github.com/sunil-dev608/space-trouble/internal/pkg/constants"
+const (
+	DateLayout       = "2006-01-02"
+	BookingTableName = "bookings"
 )
 
 type Booking struct {
@@ -17,7 +20,6 @@ type Booking struct {
 }
 
 type BookingDB struct {
-	// gorm.Model
 	ID            int64     `json:"id" gorm:"primary_key"`
 	FirstName     string    `json:"first_name"`
 	LastName      string    `json:"last_name"`
@@ -28,16 +30,21 @@ type BookingDB struct {
 	LaunchDate    time.Time `json:"launch_date"`
 }
 
+type BookingResponse struct {
+	ID int64 `json:"id"`
+}
+
 func (b *BookingDB) TableName() string {
 	return "bookings"
 }
 
+// ToDB converts a Booking JSON object to a BookingDB
 func (b *Booking) ToDB() (*BookingDB, error) {
-	dob, err := time.Parse(constants.DateLayout, b.Birthday)
+	dob, err := time.Parse(DateLayout, b.Birthday)
 	if err != nil {
 		return nil, err
 	}
-	launchDate, err := time.Parse(constants.DateLayout, b.LaunchDate)
+	launchDate, err := time.Parse(DateLayout, b.LaunchDate)
 	if err != nil {
 		return nil, err
 	}
@@ -50,4 +57,12 @@ func (b *Booking) ToDB() (*BookingDB, error) {
 		DestinationID: b.DestinationID,
 		LaunchDate:    launchDate,
 	}, nil
+}
+
+func (b *Booking) Validate() bool {
+	if b.FirstName == "" || b.LastName == "" || b.Gender == "" || b.Birthday == "" ||
+		b.LaunchpadID == "" || b.DestinationID == "" || b.LaunchDate == "" {
+		return false
+	}
+	return true
 }

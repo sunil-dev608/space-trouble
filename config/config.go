@@ -7,7 +7,8 @@ import (
 )
 
 type Config struct {
-	DBDsn string
+	DBDsn         string
+	ServerAddress string
 }
 
 var (
@@ -15,6 +16,7 @@ var (
 	cfg  *Config
 )
 
+// GetConfig returns the configuration
 func GetConfig() (*Config, error) {
 
 	var err error
@@ -24,6 +26,10 @@ func GetConfig() (*Config, error) {
 		if cfg.DBDsn == "" {
 			cfg = nil
 			err = fmt.Errorf("DB_DSN is not set")
+		}
+		cfg.ServerAddress = os.Getenv("SERVER_ADDRESS")
+		if cfg.ServerAddress == "" {
+			cfg.ServerAddress = ":8080"
 		}
 	})
 
