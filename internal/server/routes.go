@@ -23,9 +23,6 @@ func setupRoutes(e *echo.Echo, cfg *config.Config, db *gorm.DB, logger logger.Lo
 
 	// Users routes
 	users := v1.Group("/bookings")
-	// users.POST("/create", bookingsHandler.CreateBooking)
-	// users.GET("/all", bookingsHandler.GetAllBookings)
-	// users.DELETE("/:id", bookingsHandler.DeleteBooking)
 	users.POST("/create", bookingsHandler.CreateBooking, middleware.Auth())
 	users.GET("/all", bookingsHandler.GetAllBookings, middleware.Auth())
 	users.DELETE("/:id", bookingsHandler.DeleteBooking, middleware.Auth())

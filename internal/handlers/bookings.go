@@ -44,7 +44,12 @@ func (h *BookingHandler) CreateBooking(c echo.Context) error {
 		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", errors.New("all fields are required"))
 	}
 
-	if id, err := h.bookingService.CreateBooking(&req); err != nil {
+	booking, err := req.ToDB()
+	if err != nil {
+		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", err)
+	}
+
+	if id, err := h.bookingService.CreateBooking(c.Request().Context(), booking); err != nil {
 		return response.ErrorResponse(c, http.StatusInternalServerError, "failed to create booking", err)
 	} else {
 		resp := model.BookingResponse{ID: id}
@@ -56,7 +61,7 @@ func (h *BookingHandler) CreateBooking(c echo.Context) error {
 
 // GetAllBookings returns all the bookings
 func (h *BookingHandler) GetAllBookings(c echo.Context) error {
-	bookings, err := h.bookingService.GetAllBookings()
+	bookings, err := h.bookingService.GetAllBookings(c.Request().Context())
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusInternalServerError, "failed to get bookings", err)
 	}
@@ -75,7 +80,7 @@ func (h *BookingHandler) DeleteBooking(c echo.Context) error {
 		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", err)
 	}
 
-	if err := h.bookingService.DeleteBooking(ID); err != nil {
+	if err := h.bookingService.DeleteBooking(c.Request().Context(), ID); err != nil {
 		return response.ErrorResponse(c, http.StatusInternalServerError, "failed to delete booking", err)
 	} else {
 		return response.SuccessResponse(c, http.StatusOK, "booking deleted", nil)
