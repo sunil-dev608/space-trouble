@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/sunil-dev608/space-trouble/config"
+	"github.com/sunil-dev608/space-trouble/internal/competitors"
 	"github.com/sunil-dev608/space-trouble/internal/pkg/model"
 	"github.com/sunil-dev608/space-trouble/internal/repository"
 )
@@ -15,13 +17,15 @@ type BookingService interface {
 }
 
 type bookingService struct {
-	bookingRepo repository.BookingRepository
+	competitorLaunchesProvier competitors.CompetitorLaunchesProvier
+	bookingRepo               repository.BookingRepository
 }
 
 // NewBookingService creates a new BookingService
-func NewBookingService(bookingRepo repository.BookingRepository) BookingService {
+func NewBookingService(cfg *config.Config, bookingRepo repository.BookingRepository) BookingService {
 	return &bookingService{
-		bookingRepo: bookingRepo,
+		competitorLaunchesProvier: competitors.NewCompetitorLaunchesProvier(cfg.CompetitorLaunchesAPIURL),
+		bookingRepo:               bookingRepo,
 	}
 }
 
@@ -43,7 +47,13 @@ func (s *bookingService) CreateBooking(ctx context.Context, booking *model.Booki
 		return -1, err
 	}
 	if hasConflictingFlight {
-		return -1, errors.New("conflicting flight")
+		return -1, errors.New("has conflicting flight")
+	}
+
+	if hasCompetingFlight, err := s.competitorLaunchesProvier.HasCompetingFlight(ctx, booking.LaunchpadID, booking.LaunchDate); err != nil {
+		return -1, err
+	} else if hasCompetingFlight {
+		return -1, errors.New("has competing flight")
 	}
 
 	return s.bookingRepo.CreateBooking(ctx, booking)

@@ -15,7 +15,7 @@ import (
 func setupRoutes(e *echo.Echo, cfg *config.Config, db *gorm.DB, logger logger.Logger) {
 	// Create handlers
 	bookingRepo := repository.NewBookingRepository(db)
-	bookingService := service.NewBookingService(bookingRepo)
+	bookingService := service.NewBookingService(cfg, bookingRepo)
 	bookingsHandler := handlers.NewBookingHandler(bookingService, cfg, logger)
 
 	// API v1 group

@@ -53,7 +53,6 @@ func (h *BookingHandler) CreateBooking(c echo.Context) error {
 		return response.ErrorResponse(c, http.StatusInternalServerError, "failed to create booking", err)
 	} else {
 		resp := model.BookingResponse{ID: id}
-
 		return response.SuccessResponse(c, http.StatusCreated, "user created", &resp)
 	}
 

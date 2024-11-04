@@ -7,8 +7,10 @@ import (
 )
 
 type Config struct {
-	DBDsn         string
-	ServerAddress string
+	DBDsn                      string
+	ServerAddress              string
+	CompetitorLaunchesAPIURL   string
+	CompetitorLaunchpadsAPIURL string
 }
 
 var (
@@ -31,6 +33,9 @@ func GetConfig() (*Config, error) {
 		if cfg.ServerAddress == "" {
 			cfg.ServerAddress = ":8080"
 		}
+
+		cfg.CompetitorLaunchesAPIURL = os.Getenv("COMPETITOR_LAUNCHES_API_URL")
+		cfg.CompetitorLaunchpadsAPIURL = os.Getenv("COMPETITOR_LAUNCHPADS_API_URL")
 	})
 
 	return cfg, err

@@ -21,10 +21,10 @@ func SuccessResponse(c echo.Context, status int, message string, data interface{
 }
 
 // ErrorResponse returns an error response
-func ErrorResponse(c echo.Context, status int, message string, err interface{}) error {
+func ErrorResponse(c echo.Context, status int, message string, err error) error {
 	return c.JSON(status, Response{
 		Status:  status,
 		Message: message,
-		Error:   err,
+		Error:   err.Error(),
 	})
 }
