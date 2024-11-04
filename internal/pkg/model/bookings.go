@@ -2,6 +2,9 @@ package model
 
 import (
 	"time"
+
+	"github.com/sunil-dev608/space-trouble/config"
+	"github.com/sunil-dev608/space-trouble/internal/competitors"
 )
 
 const (
@@ -38,6 +41,35 @@ func (b *BookingDB) TableName() string {
 	return "bookings"
 }
 
+type ValidationStatus int
+
+const (
+	Valid ValidationStatus = iota
+	MissingParameters
+	InvalidDestination
+	InvalidLaunchpad
+	InvalidLaunchDate
+	InvalidBirthday
+)
+
+func (v ValidationStatus) String() string {
+	switch v {
+	case Valid:
+		return "Valid"
+	case MissingParameters:
+		return "MissingParameters"
+	case InvalidDestination:
+		return "InvalidDestination"
+	case InvalidLaunchpad:
+		return "InvalidLaunchpad"
+	case InvalidLaunchDate:
+		return "InvalidLaunchDate"
+	case InvalidBirthday:
+		return "InvalidBirthday"
+	}
+	return "Unknown"
+}
+
 // ToDB converts a Booking JSON object to a BookingDB
 func (b *Booking) ToDB() (*BookingDB, error) {
 	dob, err := time.Parse(DateLayout, b.Birthday)
@@ -59,10 +91,28 @@ func (b *Booking) ToDB() (*BookingDB, error) {
 	}, nil
 }
 
-func (b *Booking) Validate() bool {
+func (b *Booking) Validate(cfg *config.Config) ValidationStatus {
+
 	if b.FirstName == "" || b.LastName == "" || b.Gender == "" || b.Birthday == "" ||
 		b.LaunchpadID == "" || b.DestinationID == "" || b.LaunchDate == "" {
-		return false
+		return MissingParameters
 	}
-	return true
+
+	if _, found := cfg.Destinations[b.DestinationID]; !found {
+		return InvalidDestination
+	}
+
+	if status, found := cfg.Launchpads[b.LaunchpadID]; !found || status != competitors.LaunchpadActive {
+		return InvalidLaunchpad
+	}
+
+	if _, err := time.Parse(DateLayout, b.Birthday); err != nil {
+		return InvalidBirthday
+	}
+
+	if _, err := time.Parse(DateLayout, b.LaunchDate); err != nil {
+		return InvalidLaunchDate
+	}
+
+	return Valid
 }

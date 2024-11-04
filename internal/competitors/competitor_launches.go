@@ -1,12 +1,12 @@
 package competitors
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
+
+	"github.com/sunil-dev608/space-trouble/internal/pkg/apicalls"
 )
 
 type Competitor struct {
@@ -47,17 +47,13 @@ func NewCompetitorLaunchesProvier(apiURL string) CompetitorLaunchesProvier {
 	}
 }
 
-const CompetitorQueryDateTimeFormat = "2017-12-15T00:00:00.000Z"
-
 func (p *competitorLaunchesProvier) HasCompetingFlight(ctx context.Context, launchpadID string, launchDate time.Time) (bool, error) {
-	dGTE := launchDate.String()
-	dLTE := launchDate.Add(24 * time.Hour).String()
 	query := CompetitorLaunchesQuery{
 		Query: Query{
 			Launchpad: launchpadID,
 			DateLocal: DateLocal{
-				DateGTE: dGTE,
-				DateLTE: dLTE,
+				DateGTE: launchDate.String(),
+				DateLTE: launchDate.Add(24 * time.Hour).String(),
 			},
 		},
 	}
@@ -66,28 +62,9 @@ func (p *competitorLaunchesProvier) HasCompetingFlight(ctx context.Context, laun
 		return false, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", p.APIURL, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return false, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := p.Client.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
-	}
-
 	var apiResponse CompetitorLaunchesAPIResponse
 
-	err = json.Unmarshal(body, &apiResponse)
-	if err != nil {
+	if err = apicalls.APICall(ctx, "POST", p.Client, jsonData, p.APIURL, &apiResponse); err != nil {
 		return false, err
 	}
 

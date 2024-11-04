@@ -40,8 +40,8 @@ func (h *BookingHandler) CreateBooking(c echo.Context) error {
 		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", err)
 	}
 
-	if !req.Validate() {
-		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", errors.New("all fields are required"))
+	if status := req.Validate(h.cfg); status != model.Valid {
+		return response.ErrorResponse(c, http.StatusBadRequest, "invalid request", errors.New(status.String()))
 	}
 
 	booking, err := req.ToDB()

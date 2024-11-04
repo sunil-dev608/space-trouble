@@ -28,6 +28,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file:", zap.Error(err))
 	}
+
+	err = config.LoadLaunchpads()
+	if err != nil {
+		log.Fatal("Error Loading launchpads:", zap.Error(err))
+	}
 	db, err := gorm.Open(postgres.Open(cfg.DBDsn), &gorm.Config{})
 
 	if err != nil {
