@@ -1,0 +1,39 @@
+# version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_DSN=postgres://space_trouble:space_trouble@postgres:5432/space_trouble
+      - SERVER_ADDRESS=:8080
+      - RATE_LIMIT=20
+      - COMPETITOR_LAUNCHES_API_URL=https://api.spacexdata.com/v5/launches/query
+      - COMPETITOR_LAUNCHPADS_API_URL=https://api.spacexdata.com/v4/launchpads
+      - DESTINATIONS=Mars,Moon,Pluto,Asteroid Belt,Europa,Titan,Ganymede
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:17.0
+    environment:
+      POSTGRES_USER: space_trouble
+      POSTGRES_PASSWORD: space_trouble
+      POSTGRES_DB: space_trouble
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "space_trouble"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

@@ -33,19 +33,20 @@ func GetConfig() (*Config, error) {
 		if cfg.DBDsn == "" {
 			cfg = nil
 			err = fmt.Errorf("DB_DSN is not set")
-		}
-		cfg.ServerAddress = os.Getenv("SERVER_ADDRESS")
-		if cfg.ServerAddress == "" {
-			cfg.ServerAddress = ":8080"
-		}
+		} else {
+			cfg.ServerAddress = os.Getenv("SERVER_ADDRESS")
+			if cfg.ServerAddress == "" {
+				cfg.ServerAddress = ":8080"
+			}
 
-		cfg.Destinations = make(map[string]interface{})
-		destinations := strings.Split(os.Getenv("DESTINATIONS"), ",")
-		for _, destination := range destinations {
-			cfg.Destinations[destination] = nil
+			cfg.Destinations = make(map[string]interface{})
+			destinations := strings.Split(os.Getenv("DESTINATIONS"), ",")
+			for _, destination := range destinations {
+				cfg.Destinations[destination] = nil
+			}
+			cfg.CompetitorLaunchesAPIURL = os.Getenv("COMPETITOR_LAUNCHES_API_URL")
+			cfg.CompetitorLaunchpadsAPIURL = os.Getenv("COMPETITOR_LAUNCHPADS_API_URL")
 		}
-		cfg.CompetitorLaunchesAPIURL = os.Getenv("COMPETITOR_LAUNCHES_API_URL")
-		cfg.CompetitorLaunchpadsAPIURL = os.Getenv("COMPETITOR_LAUNCHPADS_API_URL")
 
 	})
 
