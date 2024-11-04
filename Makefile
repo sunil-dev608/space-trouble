@@ -7,6 +7,10 @@ build:
 clean:	
 	rm -f ./cmd/bin/space-trouble
 
+.PHONY: generate
+test:
+	go generate ./...
+
 .PHONY: test
 test:
 	go test ./...
